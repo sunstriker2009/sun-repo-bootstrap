@@ -1,0 +1,44 @@
+name: SUN repository provisioning
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'Target owner/repository'
+        required: true
+        type: string
+      operation:
+        description: 'Audit, plan, apply, or verify'
+        required: true
+        default: audit
+        type: choice
+        options: [audit, plan, verify, apply]
+      required_checks:
+        description: 'Exact CI job/check names, comma-separated (required for apply)'
+        required: false
+        type: string
+      confirm_repository:
+        description: 'For apply: re-enter owner/repository exactly'
+        required: false
+        type: string
+permissions:
+  contents: read
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.operation == 'apply' && 'repository-administration' || 'repository-audit' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Run provisioner
+        env:
+          GH_TOKEN: ${{ secrets.SUN_REPO_ADMIN_TOKEN }}
+          TARGET_REPOSITORY: ${{ inputs.repository }}
+          OPERATION: ${{ inputs.operation }}
+          REQUIRED_CHECKS: ${{ inputs.required_checks }}
+          CONFIRM_REPOSITORY: ${{ inputs.confirm_repository }}
+        run: |
+          dotnet run --project src/Sun.RepoBootstrap -- \\
+            --repo "$TARGET_REPOSITORY" --mode "$OPERATION" \\
+            --checks "$REQUIRED_CHECKS" --confirm "$CONFIRM_REPOSITORY"
