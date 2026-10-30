@@ -39,6 +39,6 @@ jobs:
           REQUIRED_CHECKS: ${{ inputs.required_checks }}
           CONFIRM_REPOSITORY: ${{ inputs.confirm_repository }}
         run: |
-          dotnet run --project src/Sun.RepoBootstrap -- \\
-            --repo "$TARGET_REPOSITORY" --mode "$OPERATION" \\
+          dotnet run --project src/Sun.RepoBootstrap -- \
+            --repo "$TARGET_REPOSITORY" --mode "$OPERATION" \
             --checks "$REQUIRED_CHECKS" --confirm "$CONFIRM_REPOSITORY"
